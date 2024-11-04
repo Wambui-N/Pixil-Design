@@ -8,9 +8,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        brule: ["var(--font-brule)"],
+        satoshi: ["var(--font-satoshi)"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        transparent: "transparent",
+        current: "currentColor",
+        black: "#0B0100",
+        white: "#F9F8F3",
+        orange: "#FF2F13",
+        grey: "#A89F9A",
+        sand: "#E5DCD7",
       },
     },
   },
