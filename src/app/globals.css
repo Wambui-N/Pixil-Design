@@ -7,12 +7,14 @@
     @apply bg-white text-black font-satoshi;
   }
   h1{
-    @apply font-brule text-4xl;
+    @apply font-brule text-5xl uppercase;
   }
 }
 
 @layer utilities {
-  
+  .responsive{
+    @apply max-w-screen-xl mx-auto lg:px-20 md:px-10 px-4;
+  }
 }
 
 @layer components{

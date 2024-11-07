@@ -1,10 +1,13 @@
+import Navbar from "@/components/layout/Navbar";
+import Hero from "@/sections/Hero";
+import ProjectsFeature from "@/sections/ProjectsFeature";
 import React from "react";
 
 export default function Home() {
   return (
-    <div>
-      <h1>Title</h1>
-      <p>paragraph</p>
-    </div>
+    <main>
+      <Hero text="Your Brand Deserves a Website that Captivates, Connects, and Converts" />
+      <ProjectsFeature />
+    </main>
   );
 }
