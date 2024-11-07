@@ -28,6 +28,7 @@ const config: Config = {
         white: "#F9F8F3",
         orange: "#FF2F13",
         grey: "#A89F9A",
+        blue: "#A8C2E0",
         sand: "#E5DCD7",
       },
     },

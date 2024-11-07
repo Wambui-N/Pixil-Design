@@ -3,7 +3,7 @@ export const projects = [
     id: 1,
     projectName: "African Plains Conservation Trust",
     tabs: ["Branding", "Website"],
-    src: "/apct.png",
+    src: "/project 2.png",
   },
   {
     id: 2,

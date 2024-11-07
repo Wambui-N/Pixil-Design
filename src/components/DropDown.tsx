@@ -11,7 +11,7 @@ const navLinks = [
   { path: "/work", label: "Work" },
   { path: "/about", label: "About" },
   { path: "/services", label: "Services" },
-//   { path: "/Contact", label: "Contact" },
+  //   { path: "/Contact", label: "Contact" },
 ];
 
 const container = {
@@ -101,7 +101,7 @@ const DropDown = () => {
               href="/contact"
               className="text-sand font-brule font-medium text-2xl uppercase py-2 flex flex-row justify-end items-center"
             >
-              Let&apos;s Get Started <ArrowUpRight color="#E5DCD7" />
+              Let's Get Started <ArrowUpRight color="#E5DCD7" />
             </Link>
           </motion.div>
         )}
