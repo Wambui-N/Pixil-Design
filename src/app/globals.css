@@ -9,14 +9,19 @@
   h1, h2{
     @apply font-brule text-5xl uppercase;
   }
+  h3{
+    @apply text-3xl font-semibold uppercase;
+  }
 }
 
 @layer utilities {
   .responsive{
-    @apply max-w-screen-xl mx-auto lg:px-20 md:px-10 px-4;
+    @apply max-w-screen-2xl mx-auto lg:px-20 md:px-10 px-4;
   }
 }
 
 @layer components{
-
+  .form-label{
+    @apply text-base font-normal;
+  }
 }
