@@ -19,6 +19,7 @@ const ProjectsFeature = () => {
         </Link>
       </div>
       <div className="grid grid-cols-4 gap-6">
+        {/* TODO: fix the project cards */}
         {projects.slice(0, 4).map((project: { id: React.Key | null | undefined; projectName: string; src: string; tabs: any[]; }) => (
           <FeaturesCard
             key={project.id}
