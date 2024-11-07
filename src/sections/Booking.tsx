@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { useState } from "react";
+import { Analytics } from "@/lib/analytics";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import {
@@ -17,13 +19,32 @@ import {
 } from "@/components/ui/Form";
 import { Input } from "@/components/ui/Input";
 
+const projectTypes = [
+  { id: "website", label: "Web site" },
+  { id: "branding", label: "Branding" },
+  { id: "seo", label: "SEO" },
+] as const;
+
+const timeframes = [
+  { id: "1month", label: "1 month" },
+  { id: "2-3months", label: "2-3 months" },
+  { id: "3plus", label: "3+ months" },
+] as const;
+
 // Define schema
 const formSchema = z.object({
   fullName: z
     .string()
-    .min(2, { message: "Full Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  phone: z.string().optional(),
+    .min(2, { message: "Full Name must be at least 2 characters." })
+    .max(100, { message: "Name is too long." }),
+  email: z
+    .string()
+    .email({ message: "Invalid email address." })
+    .max(255, { message: "Email is too long." }),
+  phone: z
+    .string()
+    .regex(/^\+?[\d\s-()]{0,20}$/, { message: "Invalid phone number format." })
+    .optional(),
   companyName: z
     .string()
     .min(2, { message: "Company Name must be at least 2 characters." }),
@@ -31,9 +52,7 @@ const formSchema = z.object({
     .array(z.string())
     .min(1, { message: "Select at least one project type." }),
   desiredTime: z.string().min(1, { message: "Select a desired time." }),
-  message: z
-    .string()
-    .min(1, { message: "How can we help you?" }),
+  message: z.string().min(1, { message: "How can we help you?" }),
 });
 
 // Define the form data type
@@ -41,9 +60,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export function Booking() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
 
   const methods = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -59,27 +75,80 @@ export function Booking() {
   });
 
   const onSubmit: SubmitHandler<FormData> = async (values) => {
+    const loadingToast = toast.loading("Submitting your request...", {
+      duration: Infinity,
+    });
+
     try {
       setIsSubmitting(true);
-      console.log("Form submitted:", values);
-      setSubmitStatus("success");
-      methods.reset();
 
-      setTimeout(() => {
-        setSubmitStatus("idle");
-      }, 3000);
+      Analytics.track("form_submission_started", {
+        formType: "booking",
+      });
+
+      const response = await fetch("/api/submit-booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+
+      if (!response.ok) {
+        throw new Error("Submission failed");
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success("Thanks for reaching out!", {
+        description: "We'll get back to you within 24-48 hours.",
+        duration: 5000,
+      });
+      // TODO send user welcome package
+      // TODO enable tinycal booking
+      // TODO Notify me when booking is made
+      // TODO collect user email address
+
+      methods.reset();
+      Analytics.track("form_submission_success", {
+        formType: "booking",
+      });
     } catch (error) {
       console.error("Submission error:", error);
-      setSubmitStatus("error");
+
+      toast.dismiss(loadingToast);
+      toast.error("Something went wrong", {
+        description: "Please try again or contact us directly.",
+        duration: 5000,
+      });
+
+      Analytics.track("form_submission_error", {
+        formType: "booking",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col responsive py-12">
+    <section
+      className="flex flex-col responsive py-12"
+      aria-labelledby="booking-title"
+    >
+      <div className="space-y-4 py-12 text-center">
+        <h2 id="booking-title" className="text-3xl font-bold">
+          Enough chit chat, Let&apos;s get to work
+        </h2>
+        <p>
+          We are committed to delivering personalized services, which is why we
+          only take on 3 projects at a time.
+          <br /> Are you our next success story?
+        </p>
+      </div>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8">
+        <form
+          onSubmit={methods.handleSubmit(onSubmit)}
+          className="space-y-8"
+          noValidate
+        >
           <div className="grid grid-cols-2 gap-12 w-full">
             <FormField
               control={methods.control}
@@ -137,22 +206,30 @@ export function Booking() {
               <FormItem>
                 <FormLabel className="form-label">Project Type</FormLabel>
                 <FormControl>
-                  <div className="grid grid-cols-3 w-full gap-4">
-                    {["Web site", "Branding", "SEO"].map((type) => (
-                      <label key={type} className="flex items-center space-x-2">
+                  <div
+                    className="grid grid-cols-1 sm:grid-cols-3 w-full gap-4"
+                    role="group"
+                    aria-labelledby="project-type-label"
+                  >
+                    {projectTypes.map(({ id, label }) => (
+                      <label
+                        key={id}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
-                          value={type}
-                          checked={field.value.includes(type)}
+                          value={label}
+                          checked={field.value.includes(label)}
                           onChange={() => {
-                            const newValue = field.value.includes(type)
-                              ? field.value.filter((v) => v !== type)
-                              : [...field.value, type];
+                            const newValue = field.value.includes(label)
+                              ? field.value.filter((v) => v !== label)
+                              : [...field.value, label];
                             field.onChange(newValue);
                           }}
                           className="w-5 h-5 rounded-full border border-grey accent-orange"
+                          aria-label={label}
                         />
-                        <span>{type}</span>
+                        <span>{label}</span>
                       </label>
                     ))}
                   </div>
@@ -169,16 +246,16 @@ export function Booking() {
                 <FormLabel className="form-label">Desired Time</FormLabel>
                 <FormControl>
                   <div className="grid grid-cols-3 w-full gap-4">
-                    {["1 month", "2-3 months", "3+ months"].map((time) => (
-                      <label key={time} className="flex items-center space-x-2">
+                    {timeframes.map(({ id, label }) => (
+                      <label key={id} className="flex items-center space-x-2">
                         <input
                           type="radio"
-                          value={time}
-                          checked={field.value === time}
-                          onChange={() => field.onChange(time)}
+                          value={label}
+                          checked={field.value === label}
+                          onChange={() => field.onChange(label)}
                           className="w-5 h-5 rounded-full border border-grey accent-orange"
                         />
-                        <span>{time}</span>
+                        <span>{label}</span>
                       </label>
                     ))}
                   </div>
@@ -209,27 +286,23 @@ export function Booking() {
           />
           <div className="inline-block w-full text-center">
             <Button
-              className="w-auto bg-black text-white"
+              className="w-auto bg-black text-white uppercase disabled:opacity-50 disabled:cursor-not-allowed"
               type="submit"
               disabled={isSubmitting}
+              aria-busy={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : "Book a Free Consultation"}
+              {isSubmitting ? (
+                <>
+                  <span className="sr-only">Submitting form...</span>
+                  <span className="animate-pulse">Submitting...</span>
+                </>
+              ) : (
+                "Book a Free Consultation"
+              )}
             </Button>
-
-            {submitStatus === "success" && (
-              <p className="mt-4 text-blue">
-                Thank you! We'll be in touch soon.
-              </p>
-            )}
-
-            {submitStatus === "error" && (
-              <p className="mt-4 text-orange-500">
-                Something went wrong. Please try again.
-              </p>
-            )}
           </div>
         </form>
       </FormProvider>
-    </div>
+    </section>
   );
 }

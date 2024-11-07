@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
-
+import Footer from "@/components/layout/Footer";
 const brule = localFont({
   src: "./fonts/Brule-Medium.otf",
   variable: "--font-brule",
@@ -43,6 +43,7 @@ export default function RootLayout({
       <body className={`${satoshi.variable} ${brule.variable}`}>
         <Navbar />
         {children}
+        <Footer />
       </body>
     </html>
   );

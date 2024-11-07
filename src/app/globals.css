@@ -16,7 +16,7 @@
 
 @layer utilities {
   .responsive{
-    @apply max-w-screen-2xl mx-auto lg:px-20 md:px-10 px-4;
+    @apply max-w-screen-2xl mx-auto lg:px-48 md:px-10 px-4;
   }
 }
 

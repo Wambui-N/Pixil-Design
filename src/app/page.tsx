@@ -1,7 +1,8 @@
 import Hero from "@/sections/Hero";
-import {Booking} from "@/sections/Booking";
+import { Booking } from "@/sections/Booking";
 import ProjectsFeature from "@/sections/ProjectsFeature";
 import ServicesSection from "@/sections/ServicesSection";
+import Checklist from "@/sections/Checklist";
 import React from "react";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <ProjectsFeature />
       <ServicesSection />
       <Booking />
+      <Checklist />
     </main>
   );
 }
